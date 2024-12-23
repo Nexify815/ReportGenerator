@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Skill Assessment Report Generator</title>
+  <style>
+    /* General Reset */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      background: #c8c8cc;
+      color: #333;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    #container {
+      background: #ffffff;
+      border-radius: 8px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      padding: 20px 30px;
+      max-width: 500px;
+      width: 100%;
+      text-align: center;
+    }
+
+  h1 {
+  font-size: 20px;
+  margin-bottom: 20px;
+  padding: 10px 20px;
+  border-radius: 4px;
+  font-weight: bold;
+  color: white;
+  background: #1E90FF; /* Same as button */
+  text-align: center;
+}
+
+  
+  
+
+    #status {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 1%;
+      border: none;
+      border-radius: 4px;
+      font-size: 18px;
+      font-weight: bold;
+      background: #1E90FF;
+      color: #fa0505;
+
+    }
+
+    #progress-bar {
+      width: 100%;
+      background: #616163;
+      border-radius: 25px;
+      overflow: hidden;
+      height: 25px;
+      margin: 15px 0;
+      
+    }
+
+    #progress {
+      background: #3498db;
+      color: white;
+      text-align: center;
+      line-height: 25px;
+      width: 0%;
+      height: 100%;
+      font-weight: bold;
+      transition: width 0.4s ease-in-out;
+    }
+
+    label {
+      font-weight: bold;
+      display: block;
+      text-align: left;
+      margin-top: 15px;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      margin-bottom: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+
+    button {
+      width: 48%;
+      padding: 10px;
+      margin: 10px 1%;
+      border: none;
+      border-radius: 4px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.3s ease, transform 0.1s ease;
+      background: #1E90FF;
+      color: white;
+    }
+
+    /* Add hover effect */
+    button:hover {
+      opacity: 0.9;
+    }
+
+    /* Add pressed effect */
+    button:active {
+      transform: scale(0.95); /* Slightly shrink the button */
+    }
+
+    /* Specific styles for the first button (Start) */
+    button:first-child {
+      background: #1E90FF; /* Dodger Blue */
+      color: white;
+    }
+
+    button:first-child:hover {
+      background: #4169E1; /* Royal Blue */
+    }
+
+    button:first-child:active {
+      background: #00008B; /* Dark Blue */
+    }
+
+    /* Specific styles for the second button (Cancel) */
+    button:last-child {
+      background: #DC143C; /* Crimson */
+      color: white;
+    }
+
+    button:last-child:hover {
+      background: #B22222; /* Firebrick */
+    }
+
+    button:last-child:active {
+      background: #8B0000; /* Dark Red */
+    }
+
+    .footer {
+      margin-top: 20px;
+      font-size: 12px;
+      color: #95a5a6;
+    }
+
+    .footer a {
+      color: #3498db;
+      text-decoration: none;
+    }
+
+    .footer a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div id="container">
+    <h1>Student Skill Assessment Report</h1>
+    <div id="status">Not Started </div>
+    <div id="progress-bar">
+      <div id="progress">0%</div>
+    </div>
+
+    <label for="schoolName">School Name:</label>
+    <input type="text" id="schoolName" required>
+
+    <label for="term">Term:</label>
+    <input type="text" id="term" required>
+
+    <button onclick="startReportGeneration()">Start Report Generation</button>
+    <button type="button" class="button" onclick="cancelProcess()">Cancel</button>
+
+    <div class="footer">
+      <p>Created by <a href="https://bountifultechnologies.com" target="_blank">BTCL</a></p>
+    </div>
+  </div>
+
+  <script>
+    function updateProgressBar(progress) {
+      const progressElement = document.getElementById('progress');
+      const statusElement = document.getElementById('status');
+
+      progressElement.style.width = progress + '%';
+      progressElement.innerText = progress + '%';
+
+      if (progress === 100) {
+        statusElement.innerText = "All Reports Generated!";
+        statusElement.style.color = "#11fa05";  // Green for success
+      } 
+      else {
+        statusElement.innerText = "Generating Reports...";
+        statusElement.style.color = "#e4e80c";
+      }
+    }
+
+    function startReportGeneration() {
+      const schoolName = document.getElementById('schoolName').value;
+      const term = document.getElementById('term').value;
+
+      if (!schoolName || !term) {
+        alert("Please fill all fields.");
+        return;
+      }
+
+      google.script.run.withSuccessHandler(function() {
+        updateProgressBar(100);
+      }).startReportGeneration(schoolName, term);
+
+      let intervalId = setInterval(function() {
+        google.script.run.withSuccessHandler(function(progress) {
+          updateProgressBar(progress);
+          if (progress === 100) {
+            clearInterval(intervalId); // Stop checking when done
+          }
+        }).getProgress();
+      }, 2000);
+    }
+
+    function cancelProcess() {
+      google.script.run.cancelBatchProcessing();
+      alert("Batch processing has been canceled.");
+    }
+  </script>
+</body>
+</html>
